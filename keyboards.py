@@ -19,10 +19,12 @@ def main_menu_kb():
 	keyboard = InlineKeyboardMarkup()
 
 	strenght_button = InlineKeyboardButton("Стастистика", callback_data="pass")
-	agility_button = InlineKeyboardButton("Инвентарь", callback_data="pass")
+	
 	free_btn = InlineKeyboardButton("Бесплатный предмет", callback_data="free_item")
+	road = InlineKeyboardButton("В путь", callback_data="start_road")
 
-	keyboard.add(strenght_button, agility_button)
+	keyboard.add(strenght_button)
 	keyboard.add(free_btn)
+	keyboard.add(road)
 
 	return keyboard

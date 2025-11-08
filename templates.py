@@ -12,29 +12,6 @@ player = {
 	"roll_count": 0
 }
 
-equipment = [
-	{
-		"item_name": "Шлем бронзовый",
-		"attribute": "armor",
-		"value": 2,
-	},
-	{
-		"item_name": "Деревянный щит",
-		"attribute": "armor",
-		"value": 3,
-	},
-	{
-		"item_name": "Деревянный меч",
-		"attribute": "strenght",
-		"value": 5,
-	},
-	{
-		"item_name": "Малое зелье лечения",
-		"attribute": "hp",
-		"value": 10,
-	}
-]
-
 equipment = {
 	"Шлем бронзовый": {
 		"attribute": "armor",
@@ -51,6 +28,14 @@ equipment = {
 	"Малое зелье лечения": {
 		"attribute": "hp",
 		"value": 10,
+	},
+	"Яблоко": {
+		"attribute": "hp",
+		"value": 1.5,
+	},
+	"Хлеб": {
+		"attribute": "hp",
+		"value": 1.5,
 	}
 }
 
@@ -86,7 +71,8 @@ npc = [
 		"agility": 5,
 		"charisma": 8,
 		"intellect": 4,
-		"inventory": [],
+		"inventory": ["Яблоко", "Хлеб", "Малое зелье лечения"],
 		"quests": []
 	},
+
 ]

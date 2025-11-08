@@ -9,6 +9,7 @@ from telebot.util import quick_markup
 from config import token
 from templates import *
 from keyboards import make_roll_attributes, main_menu_kb
+from database import *
 
 bot = telebot.TeleBot(token=token)
 
@@ -52,9 +53,10 @@ def free_item(message):
 
 	if current_time - last >= WAIT_TIME:
 		user_state[user_id]["player"]["last_free_item_time"] = current_time
-		potion = equipment.get("Малое зелье лечения")
+		# здесь устроим подключение к бд
+		potion = get_item("Малое зелье лечения")
 		if potion:
-			user_state[user_id]["player"]["inventory"].append("Малое зелье лечения")
+			user_state[user_id]["player"]["inventory"].append(potion)
 			bot.send_message(
 				chat_id=user_id, 
 				text="Вы получили бесплатное зелье лечения!"
