@@ -21,24 +21,29 @@ WAIT_TIME = 1 * 60 * 60
 def start_cmd(message):
 	chat_id = message.chat.id
 
-	gif_path = os.path.join("static", "gif", "start.gif")
-	if os.path.exists(gif_path):
-		with open(gif_path, "rb") as gif_file:
-			bot.send_animation(
+	if chat_id not in get_all_username():
+		gif_path = os.path.join("static", "gif", "start.gif")
+		if os.path.exists(gif_path):
+			with open(gif_path, "rb") as gif_file:
+				bot.send_animation(
+					chat_id=chat_id,
+					animation=gif_file,
+					caption="Утро. Ты открываешь глаза и не понимаешь где ты. Как тебя зовут?"
+				)
+		else:
+			bot.send_message(
 				chat_id=chat_id,
-				animation=gif_file,
-				caption="Утро. Ты открываешь глаза и не понимаешь где ты. Как тебя зовут?"
+				text="Утро. Ты открываешь глаза и не понимаешь где ты. Как тебя зовут?"
 			)
-	else:
-		bot.send_message(
-			chat_id=chat_id,
-			text="Утро. Ты открываешь глаза и не понимаешь где ты. Как тебя зовут?"
-		)
 
-	user_state[chat_id] = {
-		"step": "awaiting_name",
-		"player": player.copy()
-	}
+		user_state[chat_id] = {
+			"step": "awaiting_name",
+			"player": player.copy()
+		}
+	else:
+		data_in_bd = get_user(chat_id)
+		user_state[chat_id] = data_in_bd[chat_id]
+		main_menu(message)
 
 @bot.callback_query_handler(func=lambda call: call.data == "free_item")
 @bot.message_handler(commands=["free_item"])
@@ -140,6 +145,7 @@ def handle_roll_buttons(call):
 
 	user_state[chat_id]["player"]["roll_count"] += 1
 	if user_state[chat_id]["player"]["roll_count"] == 4:
+		update_data(chat_id, user_state[chat_id])
 		main_menu(call.message)
 
 # Функция для расчета урона
@@ -227,12 +233,13 @@ def start_battle(message):
 
 @bot.message_handler(func=lambda message: message.chat.id in user_state and user_state[message.chat.id]["step"] == "awaiting_name")
 def set_character_name(message):
-	print("set_character_name")
 	chat_id = message.chat.id
 	name = message.text
 
 	user_state[chat_id]["player"]["name"] = name
 	user_state[chat_id]["step"] = "awaiting_attributes"
+
+	add_user(chat_id, user_state[chat_id])
 
 	bot.send_message(
 		chat_id=chat_id,
