@@ -4,14 +4,11 @@ db = "db.db"
 conn = sqlite3.connect(db, check_same_thread=False)
 cur = conn.cursor()
 
-"""
-	"Малое зелье лечения": {
-		"attribute": "hp",
-		"value": 10,
-	},
-"""
-
-def get_item(item):
+def get_item(item: str) -> dict:
+	"""
+	Функция возвращает информацию о предмете по его названию
+	"""
+	
 	cur.execute("SELECT * FROM equipment WHERE item_name = ?", (item,))
 	r = cur.fetchall()
 	r = r[0]
@@ -27,24 +24,7 @@ def get_item(item):
 	else:
 		return {}
 
-def add_user(user_id, user_state):
-	"""
-	user_state = {
-		"step": "awaiting_name",
-		"player": {
-			"name": "",
-			"hp": 100,
-			"armor": 0,
-			"strenght": 0,
-			"agility": 0,
-			"charisma": 0,
-			"intellect": 0,
-			"inventory": [],
-			"last_free_item_time": 0,
-			"roll_count": 0
-		}
-	}
-	"""
+def add_user(user_id: int, user_state: dict) -> bool:
 	ins = """
 		INSERT INTO 
 		users (user_id, step, name, hp, armor, strenght, 
@@ -54,33 +34,38 @@ def add_user(user_id, user_state):
 	"""
 
 	inventory = ",".join(user_state["player"]["inventory"])
+	player = user_state["player"]
 
-	data = (
-		user_id,
-		user_state["step"],
-		user_state["player"]["name"],
-		user_state["player"]["hp"],
-		user_state["player"]["armor"],
-		user_state["player"]["strenght"],
-		user_state["player"]["agility"],
-		user_state["player"]["charisma"],
-		user_state["player"]["intellect"],
-		inventory,
-		user_state["player"]["last_free_item_time"],
-		user_state["player"]["roll_count"],
+	# Готовим данные для вставки в базу данных
+	data = (user_id, user_state["step"], player["name"], player["hp"],
+		player["armor"], player["strenght"], player["agility"], player["charisma"],
+		player["intellect"], inventory, player["last_free_item_time"],
+		player["roll_count"]
 	)
 
 	if not user_id in get_all_username():
-		cur.execute(ins, data)
-		conn.commit()
+		try:
+			cur.execute(ins, data)
+			conn.commit()
+			return True
+		except:
+			return False
+	return False
 
-def get_all_username():
+def get_all_username() -> list:
+	"""
+	Функция отправляет запрос в базу данных, чтобы найти id
+	всех пользователей.
+	"""
 	cur.execute("SELECT user_id FROM users")
 	result = cur.fetchall()
 
 	return [i[0] for i in result]
 
-def get_user(user_id):
+def get_user(user_id: int) -> dict:
+	"""
+	Функция возвращает всю информацию об игроке из базы данных
+	"""
 	cur.execute("SELECT * FROM users WHERE user_id = ?", (user_id,))
 	result = cur.fetchall()
 
@@ -104,8 +89,11 @@ def get_user(user_id):
 
 	return user_state
 
-def update_data(user_id, user_state):
-
+def update_data(user_id: int, user_state: dict) -> bool:
+	"""
+	Функция обновляет все данные по указанному user_id
+	"""
+	
 	inventory = ",".join(user_state["player"]["inventory"])
 	data = (
 		user_state["step"],
@@ -122,23 +110,19 @@ def update_data(user_id, user_state):
 		user_id,
 	)
 
-
-	cur.execute(
-		"""
-		UPDATE users 
-        SET step = ?, 
-            name = ?, 
-            hp = ?, 
-            armor = ?, 
-            strenght = ?, 
-            agility = ?, 
-            charisma = ?, 
-            intellect = ?, 
-            inventory = ?,
-            last_free_item_time = ?, 
-            roll_count = ?
-        WHERE user_id = ?
-		""", 
-		data
-	)
-	conn.commit()
+	try:
+		cur.execute(
+			"""
+			UPDATE users 
+	        SET step = ?, name = ?, hp = ?, armor = ?, strenght = ?, 
+	            agility = ?, charisma = ?, intellect = ?, 
+	            inventory = ?, last_free_item_time = ?, roll_count = ?
+	        WHERE user_id = ?
+			""", 
+			data
+		)
+		conn.commit()
+		
+		return True
+	except:
+		return False
